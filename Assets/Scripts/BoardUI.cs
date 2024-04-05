@@ -10,8 +10,11 @@ namespace Chess
 
         private GameObject[,] pieceGameObjects = new GameObject[8, 8];
 
+        private const string startingPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq";
+
         void Start()
         {
+            Board.LoadPositionFromFen(startingPosition);
             CreateVisualBoard();
         }
 
