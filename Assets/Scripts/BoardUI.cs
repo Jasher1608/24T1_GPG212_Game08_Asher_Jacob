@@ -54,6 +54,8 @@ namespace Chess
             // Set the chessboard as the parent
             pieceObject.transform.SetParent(transform, false);
 
+            pieceObject.AddComponent<DragAndDropPiece>();
+
             return pieceObject;
         }
     }
