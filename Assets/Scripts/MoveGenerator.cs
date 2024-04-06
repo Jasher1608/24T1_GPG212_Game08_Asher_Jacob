@@ -43,6 +43,10 @@ namespace Chess
                     {
                         GeneratePawnMoves(startSquare, piece);
                     }
+                    else if (Piece.IsType(piece, Piece.King))
+                    {
+                        GenerateKingMoves(startSquare, piece);
+                    }
                 }
             }
             return moves;
@@ -143,6 +147,46 @@ namespace Chess
                         // En passant move
                         moves.Add(new Move(startSquare, captureSquare, isEnPassant: true));
                     }
+                }
+            }
+        }
+
+        private static void GenerateKingMoves(int startSquare, int piece)
+        {
+            foreach (int offset in kingOffsets)
+            {
+                int targetSquare = startSquare + offset;
+                if (IsSquareOnBoard(targetSquare) && System.Math.Abs((targetSquare % 8) - (startSquare % 8)) <= 1)
+                {
+                    if (Board.square[targetSquare] == Piece.None || Piece.IsColour(Board.square[targetSquare], opponentColour))
+                    {
+                        moves.Add(new Move(startSquare, targetSquare));
+                    }
+                }
+            }
+
+            if (Board.colourToMove == Piece.White)
+            {
+                if (Board.CanCastleKingsideWhite && Board.square[5] == Piece.None && Board.square[6] == Piece.None)
+                {
+                    moves.Add(new Move(startSquare, startSquare + 2, isCastling: true));
+                }
+
+                if (Board.CanCastleQueensideWhite && Board.square[1] == Piece.None && Board.square[2] == Piece.None && Board.square[3] == Piece.None)
+                {
+                    moves.Add(new Move(startSquare, startSquare - 2, isCastling: true));
+                }
+            }
+            else if (Board.colourToMove == Piece.Black)
+            {
+                if (Board.CanCastleKingsideBlack && Board.square[61] == Piece.None && Board.square[62] == Piece.None)
+                {
+                    moves.Add(new Move(startSquare, startSquare + 2, isCastling: true));
+                }
+
+                if (Board.CanCastleQueensideBlack && Board.square[57] == Piece.None && Board.square[58] == Piece.None && Board.square[59] == Piece.None)
+                {
+                    moves.Add(new Move(startSquare, startSquare - 2, isCastling: true));
                 }
             }
         }

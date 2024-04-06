@@ -72,6 +72,7 @@ public class DragAndDropPiece : MonoBehaviour
         Move attemptedMoveRookPromotion = new Move(startingIndex, newIndex, isPromotion: true, promotionPiece: Piece.Rook);
         Move attemptedMoveKnightPromotion = new Move(startingIndex, newIndex, isPromotion: true, promotionPiece: Piece.Knight);
         Move attemptedMoveBishopPromotion = new Move(startingIndex, newIndex, isPromotion: true, promotionPiece: Piece.Bishop);
+        Move attemptedMoveCastle = new Move(startingIndex, newIndex, isCastling: true);
         if (MoveGenerator.moves.Contains(attemptedMove))
         {
             TryCapturePieceAt(newIndex);
@@ -116,6 +117,11 @@ public class DragAndDropPiece : MonoBehaviour
             TryCapturePieceAt(newIndex);
             bool isWhite = Board.square[startingIndex] == (Piece.Pawn | Piece.White);
             boardUI.ShowPromotionUI(startingIndex, newIndex, isWhite);
+        }
+        else if (MoveGenerator.moves.Contains(attemptedMoveCastle))
+        {
+            boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMoveCastle);
+            Board.ToggleColourToMove();
         }
         else
         {

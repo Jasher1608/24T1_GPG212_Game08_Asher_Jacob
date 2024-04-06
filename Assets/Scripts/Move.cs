@@ -11,6 +11,8 @@ namespace Chess
         public bool IsPromotion { get; }
         public int PromotionPiece { get; }
 
+        public bool IsCastling { get; }
+
         // Constructor for regular moves
         public Move(int startSquare, int targetSquare)
         {
@@ -20,10 +22,11 @@ namespace Chess
             IsEnPassant = false;
             IsPromotion = false;
             PromotionPiece = Piece.None;
+            IsCastling = false;
         }
 
         // Constructor for special moves (en passant, promotion)
-        public Move(int startSquare, int targetSquare, bool doublePush = false, bool isEnPassant = false, bool isPromotion = false, int promotionPiece = Piece.None)
+        public Move(int startSquare, int targetSquare, bool doublePush = false, bool isEnPassant = false, bool isPromotion = false, int promotionPiece = Piece.None, bool isCastling = false)
         {
             StartSquare = startSquare;
             TargetSquare = targetSquare;
@@ -31,6 +34,7 @@ namespace Chess
             IsEnPassant = isEnPassant;
             IsPromotion = isPromotion;
             PromotionPiece = promotionPiece;
+            IsCastling = isCastling;
         }
 
         // Implementing equality methods
@@ -40,7 +44,7 @@ namespace Chess
             {
                 return StartSquare == other.StartSquare && TargetSquare == other.TargetSquare && DoublePush == other.DoublePush &&
                        IsEnPassant == other.IsEnPassant && IsPromotion == other.IsPromotion &&
-                       PromotionPiece == other.PromotionPiece;
+                       PromotionPiece == other.PromotionPiece && IsCastling == other.IsCastling;
             }
             return false;
         }
@@ -54,6 +58,7 @@ namespace Chess
             hash = hash * 31 + IsEnPassant.GetHashCode();
             hash = hash * 31 + IsPromotion.GetHashCode();
             hash = hash * 31 + PromotionPiece.GetHashCode();
+            hash = hash * 31 + IsCastling.GetHashCode();
             return hash;
         }
 

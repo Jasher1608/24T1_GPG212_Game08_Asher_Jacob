@@ -1,7 +1,8 @@
-using System.Collections.Generic;
-
 namespace Chess
 {
+    using System.Collections.Generic;
+    using System.Diagnostics;
+
     public static class Board
     {
         public static int[] square = new int[64];
@@ -11,6 +12,11 @@ namespace Chess
         public static int enPassantTarget = -1;
 
         public static bool pendingPromotion = false;
+
+        public static bool CanCastleKingsideWhite = true;
+        public static bool CanCastleQueensideWhite = true;
+        public static bool CanCastleKingsideBlack = true;
+        public static bool CanCastleQueensideBlack = true;
 
         public static void LoadPositionFromFen(string fen)
         {
@@ -52,6 +58,32 @@ namespace Chess
         {
             colourToMove = (colourToMove == Piece.White) ? Piece.Black : Piece.White;
             MoveGenerator.moves = MoveGenerator.GenerateMoves();
+        }
+
+        public static void ApplyMove(int startingIndex, int piece)
+        {
+            // If a king moves, disable castling on both sides for that color
+            if (Piece.IsType(piece, Piece.King))
+            {
+                if (Piece.IsColour(piece, Piece.White))
+                {
+                    CanCastleKingsideWhite = false;
+                    CanCastleQueensideWhite = false;
+                }
+                else
+                {
+                    CanCastleKingsideBlack = false;
+                    CanCastleQueensideBlack = false;
+                }
+            }
+            // If a rook moves, disable castling on the relevant side
+            else if (Piece.IsType(piece, Piece.Rook))
+            {
+                if (startingIndex == 0) CanCastleQueensideWhite = false;
+                else if (startingIndex == 7) CanCastleKingsideWhite = false;
+                else if (startingIndex == 56) CanCastleQueensideBlack = false;
+                else if (startingIndex == 63) CanCastleKingsideBlack = false;
+            }
         }
     }
 }

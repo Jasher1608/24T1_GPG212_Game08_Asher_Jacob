@@ -15,7 +15,7 @@ namespace Chess
 
         [SerializeField] private GameObject promotionUI;
 
-        private const string startingPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq";
+        private const string startingPosition = "r3k2r/8/4q3/8/2Q5/8/8/R3K2R";
 
         void Start()
         {
@@ -134,6 +134,57 @@ namespace Chess
                         Board.square[targetIndex] = Board.colourToMove | Piece.Bishop;
                     }
                 }
+
+                if (move.IsCastling)
+                {
+                    // Kingside
+                    int kingsideOffset = 2;
+                    int queensideOffset = -2;
+
+                    if (targetIndex == startingIndex + kingsideOffset)
+                    {
+                        int rookStartIndex = startingIndex + 3;
+                        int rookTargetIndex = targetIndex - 1;
+
+                        Board.square[rookTargetIndex] = Board.square[rookStartIndex];
+                        Board.square[rookStartIndex] = Piece.None;
+                        UpdatePieceGameObject(rookStartIndex, rookTargetIndex);
+
+                        // Toggle castling availability
+                        if (Board.colourToMove == Piece.White)
+                        {
+                            Board.CanCastleKingsideWhite = false;
+                            Board.CanCastleQueensideWhite = false;
+                        }
+                        else
+                        {
+                            Board.CanCastleKingsideBlack = false;
+                            Board.CanCastleQueensideBlack = false;
+                        }
+                    }
+                    // Queenside
+                    else if (targetIndex == startingIndex + queensideOffset)
+                    {
+                        int rookStartIndex = startingIndex - 4;
+                        int rookTargetIndex = targetIndex + 1;
+
+                        Board.square[rookTargetIndex] = Board.square[rookStartIndex];
+                        Board.square[rookStartIndex] = Piece.None;
+                        UpdatePieceGameObject(rookStartIndex, rookTargetIndex);
+
+                        // Toggle castling availability
+                        if (Board.colourToMove == Piece.White)
+                        {
+                            Board.CanCastleKingsideWhite = false;
+                            Board.CanCastleQueensideWhite = false;
+                        }
+                        else
+                        {
+                            Board.CanCastleKingsideBlack = false;
+                            Board.CanCastleQueensideBlack = false;
+                        }
+                    }
+                }
             }
 
             for (int i = 0; i < 64; i++)
@@ -173,6 +224,20 @@ namespace Chess
             else
             {
                 Board.enPassantTarget = -1;
+            }
+
+            Board.ApplyMove(startingIndex, movedPiece); // Disables castling flags
+        }
+
+        private void UpdatePieceGameObject(int startSquare, int targetSquare)
+        {
+            GameObject piece = pieceGameObjects[startSquare % 8, startSquare / 8];
+            pieceGameObjects[targetSquare % 8, targetSquare / 8] = piece;
+            pieceGameObjects[startSquare % 8, startSquare / 8] = null;
+
+            if (piece != null)
+            {
+                piece.transform.position = IndexToPosition(targetSquare);
             }
         }
 

@@ -6,6 +6,7 @@ namespace Chess
         public static readonly int[] directionOffsets = { 8, -8, -1, 1, 7, -7, 9, -9 };
         public static readonly int[][] numSquaresToEdge = new int[64][];
         public static int[] knightOffsets = { -17, -15, -10, -6, 6, 10, 15, 17 };
+        public static int[] kingOffsets = { -9, -8, -7, -1, 1, 7, 8, 9 };
 
         static PrecomputedMoveData()
         {
