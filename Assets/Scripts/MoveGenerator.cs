@@ -35,9 +35,12 @@ namespace Chess
                     {
                         GenerateSlidingMoves(startSquare, piece);
                     }
+                    else if (Piece.IsType(piece, Piece.Knight))
+                    {
+                        GenerateKnightMoves(startSquare, piece);
+                    }
                 }
             }
-
             return moves;
         }
 
@@ -66,6 +69,33 @@ namespace Chess
                     if (Piece.IsColour(pieceOnTargetSquare, opponentColour))
                     {
                         break;
+                    }
+                }
+            }
+        }
+
+        private static void GenerateKnightMoves(int startSquare, int piece)
+        {
+            int startSquareRank = startSquare / 8;
+            int startSquareFile = startSquare % 8;
+
+            foreach (int offset in knightOffsets)
+            {
+                int targetSquare = startSquare + offset;
+                int targetSquareRank = targetSquare / 8;
+                int targetSquareFile = targetSquare % 8;
+
+                // Check if the move stays within the bounds of the board
+                if (targetSquare >= 0 && targetSquare < 64)
+                {
+                    // Ensure the move does not "wrap" around the board
+                    if (System.Math.Abs(targetSquareFile - startSquareFile) <= 2 && System.Math.Abs(targetSquareRank - startSquareRank) <= 2)
+                    {
+                        // Check if the target square is not occupied by a friendly piece
+                        if (!Piece.IsColour(Board.square[targetSquare], friendlyColour))
+                        {
+                            moves.Add(new Move(startSquare, targetSquare));
+                        }
                     }
                 }
             }
