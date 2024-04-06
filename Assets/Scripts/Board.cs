@@ -8,6 +8,8 @@ namespace Chess
 
         public static int colourToMove = Piece.White;
 
+        public static int enPassantTarget = -1;
+
         public static void LoadPositionFromFen(string fen)
         {
             var pieceTypeFromSymbol = new Dictionary<char, int>

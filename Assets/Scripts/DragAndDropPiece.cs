@@ -66,10 +66,24 @@ public class DragAndDropPiece : MonoBehaviour
         int newIndex = PositionToIndex(newPosition);
 
         Move attemptedMove = new Move(startingIndex, newIndex);
+        Move attemptedMoveDouble = new Move(startingIndex, newIndex, doublePush: true);
+        Move attemptedMoveEnPassant = new Move(startingIndex, newIndex, isEnPassant: true);
         if (MoveGenerator.moves.Contains(attemptedMove))
         {
             TryCapturePieceAt(newIndex);
-            UpdateBoardState(startingIndex, newIndex);
+            boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMove);
+            Board.ToggleColourToMove();
+        }
+        else if (MoveGenerator.moves.Contains(attemptedMoveDouble))
+        {
+            TryCapturePieceAt(newIndex);
+            boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMoveDouble);
+            Board.ToggleColourToMove();
+        }
+        else if (MoveGenerator.moves.Contains(attemptedMoveEnPassant))
+        {
+            CapturePieceAtEnPassant(newIndex);
+            boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMoveEnPassant);
             Board.ToggleColourToMove();
         }
         else
@@ -161,38 +175,25 @@ public class DragAndDropPiece : MonoBehaviour
         }
     }
 
-    private void UpdateBoardState(int startingIndex, int targetIndex)
+    private void CapturePieceAtEnPassant(int newIndex)
     {
-        int movedPiece = Board.square[startingIndex];
-        Board.square[targetIndex] = movedPiece;
-        if (startingIndex != targetIndex)
+        if (Board.colourToMove == Piece.White)
         {
-            Board.square[startingIndex] = Piece.None;
+            newIndex -= 8;
+        }
+        else if (Board.colourToMove == Piece.Black)
+        {
+            newIndex += 8;
         }
 
-        for (int i = 0; i < 64; i++)
+        int x = newIndex % 8;
+        int y = newIndex / 8;
+
+        if (boardUI.pieceGameObjects[x, y] != null)
         {
-            int x = i % 8;
-            int y = i / 8;
-
-            // If there's a discrepancy between the board state and the UI, update the UI
-            if ((Board.square[i] != Piece.None && boardUI.pieceGameObjects[x, y] == null) ||
-                (Board.square[i] == Piece.None && boardUI.pieceGameObjects[x, y] != null))
-            {
-                if (boardUI.pieceGameObjects[x, y] != null)
-                {
-                    Destroy(boardUI.pieceGameObjects[x, y]);
-                    boardUI.pieceGameObjects[x, y] = null;
-                }
-
-                if (Board.square[i] != Piece.None)
-                {
-                    Vector3 position = new Vector3(x - 3.5f, y - 3.5f, 0);
-                    boardUI.pieceGameObjects[x, y] = boardUI.InstantiatePieceAtPosition(Board.square[i] & 7, Board.square[i] & 24, position);
-                }
-            }
+            Destroy(boardUI.pieceGameObjects[x, y]);
+            boardUI.pieceGameObjects[x, y] = null;
         }
-        // Special rules (en passant, castling, promotion)
     }
 
     private int PositionToIndex(Vector3 position)

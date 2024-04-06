@@ -39,6 +39,10 @@ namespace Chess
                     {
                         GenerateKnightMoves(startSquare, piece);
                     }
+                    else if (Piece.IsType(piece, Piece.Pawn))
+                    {
+                        GeneratePawnMoves(startSquare, piece);
+                    }
                 }
             }
             return moves;
@@ -99,6 +103,71 @@ namespace Chess
                     }
                 }
             }
+        }
+
+        private static void GeneratePawnMoves(int startSquare, int pawn)
+        {
+            int direction = Piece.IsColour(pawn, Piece.White) ? 1 : -1;
+            int startRank = Piece.IsColour(pawn, Piece.White) ? 1 : 6;
+            int enPassantRank = Piece.IsColour(pawn, Piece.White) ? 4 : 3; // Rank from which a pawn can perform en passant
+
+            // Single move forward
+            int forwardSquare = startSquare + 8 * direction;
+            if (IsSquareOnBoard(forwardSquare) && Board.square[forwardSquare] == Piece.None)
+            {
+                AddPawnMove(startSquare, forwardSquare, forwardSquare, pawn);
+                // Double move forward
+                int doubleForwardSquare = startSquare + 16 * direction;
+                if ((startSquare / 8) == startRank && Board.square[doubleForwardSquare] == Piece.None)
+                {
+                    moves.Add(new Move(startSquare, doubleForwardSquare, doublePush: true));
+                }
+            }
+
+            // Captures to the left and right, including en passant
+            int[] captureOffsets = { -1, 1 }; // Relative file changes for captures
+            foreach (int fileChange in captureOffsets)
+            {
+                int captureSquare = startSquare + direction * 8 + fileChange;
+                bool isCaptureSquareOnBoard = captureSquare >= 0 && captureSquare < 64 &&
+                    (startSquare % 8 + fileChange >= 0) && (startSquare % 8 + fileChange < 8);
+
+                if (isCaptureSquareOnBoard)
+                {
+                    if (Piece.IsColour(Board.square[captureSquare], opponentColour))
+                    {
+                        AddPawnMove(startSquare, captureSquare, forwardSquare, pawn);
+                    }
+                    else if (startSquare / 8 == enPassantRank && captureSquare == Board.enPassantTarget)
+                    {
+                        // En passant move
+                        moves.Add(new Move(startSquare, captureSquare, isEnPassant: true));
+                    }
+                }
+            }
+        }
+
+        private static void AddPawnMove(int startSquare, int targetSquare, int forwardSquare, int pawn)
+        {
+            // Add promotion moves or a regular pawn move
+            int promotionRank = Piece.IsColour(pawn, Piece.White) ? 7 : 0;
+            if (targetSquare / 8 == promotionRank)
+            {
+                // Add all promotion options here if needed
+                moves.Add(new Move(startSquare, targetSquare, isPromotion: true, promotionPiece: Piece.Queen));
+                moves.Add(new Move(startSquare, targetSquare, isPromotion: true, promotionPiece: Piece.Rook));
+                moves.Add(new Move(startSquare, targetSquare, isPromotion: true, promotionPiece: Piece.Knight));
+                moves.Add(new Move(startSquare, targetSquare, isPromotion: true, promotionPiece: Piece.Bishop));
+            }
+            else
+            {
+                moves.Add(new Move(startSquare, targetSquare));
+            }
+        }
+
+        private static bool IsSquareOnBoard(int square)
+        {
+            return square >= 0 && square < 64;
         }
     }
 }

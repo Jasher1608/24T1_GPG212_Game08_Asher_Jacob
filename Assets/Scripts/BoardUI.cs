@@ -88,5 +88,68 @@ namespace Chess
             int y = index / 8;
             return new Vector3(x - 3.5f, y - 3.5f, 0);
         }
+
+        public void UpdateBoardState(int startingIndex, int targetIndex, Move move)
+        {
+            int movedPiece = Board.square[startingIndex];
+            Board.square[targetIndex] = movedPiece;
+            if (startingIndex != targetIndex)
+            {
+                Board.square[startingIndex] = Piece.None;
+
+                if (move.IsEnPassant)
+                {
+                    if (Board.colourToMove == Piece.White)
+                    {
+                        targetIndex -= 8;
+                    }
+                    else if (Board.colourToMove == Piece.Black)
+                    {
+                        targetIndex += 8;
+                    }
+
+                    Board.square[targetIndex] = Piece.None;
+                }
+            }
+
+            for (int i = 0; i < 64; i++)
+            {
+                int x = i % 8;
+                int y = i / 8;
+
+                // If there's a discrepancy between the board state and the UI, update the UI
+                if ((Board.square[i] != Piece.None && pieceGameObjects[x, y] == null) ||
+                    (Board.square[i] == Piece.None && pieceGameObjects[x, y] != null))
+                {
+                    if (pieceGameObjects[x, y] != null)
+                    {
+                        Destroy(pieceGameObjects[x, y]);
+                        pieceGameObjects[x, y] = null;
+                    }
+
+                    if (Board.square[i] != Piece.None)
+                    {
+                        Vector3 position = new Vector3(x - 3.5f, y - 3.5f, 0);
+                        pieceGameObjects[x, y] = InstantiatePieceAtPosition(Board.square[i] & 7, Board.square[i] & 24, position);
+                    }
+                }
+            }
+            // Special rules (en passant, castling, promotion)
+            if (move.DoublePush)
+            {
+                if (Board.colourToMove == Piece.White)
+                {
+                    Board.enPassantTarget = targetIndex - 8;
+                }
+                else if (Board.colourToMove == Piece.Black)
+                {
+                    Board.enPassantTarget = targetIndex + 8;
+                }
+            }
+            else
+            {
+                Board.enPassantTarget = -1;
+            }
+        }
     }
 }
