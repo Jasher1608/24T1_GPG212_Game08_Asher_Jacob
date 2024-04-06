@@ -3,6 +3,7 @@ namespace Chess
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
+    using UnityEngine.UI;
 
     public class BoardUI : MonoBehaviour
     {
@@ -11,6 +12,8 @@ namespace Chess
 
         public GameObject[,] pieceGameObjects = new GameObject[8, 8];
         private List<GameObject> highlightedSquares = new List<GameObject>();
+
+        [SerializeField] private GameObject promotionUI;
 
         private const string startingPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq";
 
@@ -97,6 +100,7 @@ namespace Chess
             {
                 Board.square[startingIndex] = Piece.None;
 
+                // Modify target index for en passant
                 if (move.IsEnPassant)
                 {
                     if (Board.colourToMove == Piece.White)
@@ -109,6 +113,26 @@ namespace Chess
                     }
 
                     Board.square[targetIndex] = Piece.None;
+                }
+                // Modify target square for promotion
+                else if (move.IsPromotion)
+                {
+                    if (move.PromotionPiece == Piece.Queen)
+                    {
+                        Board.square[targetIndex] = Board.colourToMove | Piece.Queen;
+                    }
+                    else if (move.PromotionPiece == Piece.Rook)
+                    {
+                        Board.square[targetIndex] = Board.colourToMove | Piece.Rook;
+                    }
+                    else if (move.PromotionPiece == Piece.Knight)
+                    {
+                        Board.square[targetIndex] = Board.colourToMove | Piece.Knight;
+                    }
+                    else if (move.PromotionPiece == Piece.Bishop)
+                    {
+                        Board.square[targetIndex] = Board.colourToMove | Piece.Bishop;
+                    }
                 }
             }
 
@@ -150,6 +174,36 @@ namespace Chess
             {
                 Board.enPassantTarget = -1;
             }
+        }
+
+        public void ShowPromotionUI(int pawnSquare, int targetSquare, bool isWhite)
+        {
+            promotionUI.SetActive(true);
+
+            var buttons = promotionUI.GetComponentsInChildren<Button>();
+            foreach (var button in buttons)
+            {
+                button.onClick.RemoveAllListeners();
+            }
+
+            buttons[0].onClick.AddListener(() => PromotePawn(pawnSquare, targetSquare, Piece.Queen, isWhite));
+            buttons[1].onClick.AddListener(() => PromotePawn(pawnSquare, targetSquare, Piece.Rook, isWhite));
+            buttons[2].onClick.AddListener(() => PromotePawn(pawnSquare, targetSquare, Piece.Knight, isWhite));
+            buttons[3].onClick.AddListener(() => PromotePawn(pawnSquare, targetSquare, Piece.Bishop, isWhite));
+        }
+
+        private void PromotePawn(int pawnSquare, int targetSquare, int promotionPiece, bool isWhite)
+        {
+            Board.square[targetSquare] = (isWhite ? Piece.White : Piece.Black) | promotionPiece;
+            Board.square[pawnSquare] = Piece.None;
+
+            UpdateBoardState(pawnSquare, targetSquare, new Move(pawnSquare, targetSquare, isPromotion: true, promotionPiece: promotionPiece));
+
+            promotionUI.SetActive(false);
+
+            Board.pendingPromotion = false;
+
+            Board.ToggleColourToMove();
         }
     }
 }

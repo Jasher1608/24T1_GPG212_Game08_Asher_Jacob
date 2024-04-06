@@ -115,7 +115,7 @@ namespace Chess
             int forwardSquare = startSquare + 8 * direction;
             if (IsSquareOnBoard(forwardSquare) && Board.square[forwardSquare] == Piece.None)
             {
-                AddPawnMove(startSquare, forwardSquare, forwardSquare, pawn);
+                AddPawnMove(startSquare, forwardSquare, pawn);
                 // Double move forward
                 int doubleForwardSquare = startSquare + 16 * direction;
                 if ((startSquare / 8) == startRank && Board.square[doubleForwardSquare] == Piece.None)
@@ -136,7 +136,7 @@ namespace Chess
                 {
                     if (Piece.IsColour(Board.square[captureSquare], opponentColour))
                     {
-                        AddPawnMove(startSquare, captureSquare, forwardSquare, pawn);
+                        AddPawnMove(startSquare, captureSquare, pawn);
                     }
                     else if (startSquare / 8 == enPassantRank && captureSquare == Board.enPassantTarget)
                     {
@@ -147,7 +147,7 @@ namespace Chess
             }
         }
 
-        private static void AddPawnMove(int startSquare, int targetSquare, int forwardSquare, int pawn)
+        private static void AddPawnMove(int startSquare, int targetSquare, int pawn)
         {
             // Add promotion moves or a regular pawn move
             int promotionRank = Piece.IsColour(pawn, Piece.White) ? 7 : 0;

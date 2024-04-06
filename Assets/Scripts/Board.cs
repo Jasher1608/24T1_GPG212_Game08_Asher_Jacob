@@ -10,6 +10,8 @@ namespace Chess
 
         public static int enPassantTarget = -1;
 
+        public static bool pendingPromotion = false;
+
         public static void LoadPositionFromFen(string fen)
         {
             var pieceTypeFromSymbol = new Dictionary<char, int>

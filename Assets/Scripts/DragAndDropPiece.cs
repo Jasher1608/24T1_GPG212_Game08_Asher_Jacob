@@ -25,7 +25,7 @@ public class DragAndDropPiece : MonoBehaviour
     {
         Vector3 mouseWorldPos = GetMouseWorldPosition();
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !Board.pendingPromotion)
         {
             if (IsMouseOverPiece(mouseWorldPos))
             {
@@ -68,6 +68,10 @@ public class DragAndDropPiece : MonoBehaviour
         Move attemptedMove = new Move(startingIndex, newIndex);
         Move attemptedMoveDouble = new Move(startingIndex, newIndex, doublePush: true);
         Move attemptedMoveEnPassant = new Move(startingIndex, newIndex, isEnPassant: true);
+        Move attemptedMoveQueenPromotion = new Move(startingIndex, newIndex, isPromotion: true, promotionPiece: Piece.Queen);
+        Move attemptedMoveRookPromotion = new Move(startingIndex, newIndex, isPromotion: true, promotionPiece: Piece.Rook);
+        Move attemptedMoveKnightPromotion = new Move(startingIndex, newIndex, isPromotion: true, promotionPiece: Piece.Knight);
+        Move attemptedMoveBishopPromotion = new Move(startingIndex, newIndex, isPromotion: true, promotionPiece: Piece.Bishop);
         if (MoveGenerator.moves.Contains(attemptedMove))
         {
             TryCapturePieceAt(newIndex);
@@ -76,7 +80,6 @@ public class DragAndDropPiece : MonoBehaviour
         }
         else if (MoveGenerator.moves.Contains(attemptedMoveDouble))
         {
-            TryCapturePieceAt(newIndex);
             boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMoveDouble);
             Board.ToggleColourToMove();
         }
@@ -85,6 +88,34 @@ public class DragAndDropPiece : MonoBehaviour
             CapturePieceAtEnPassant(newIndex);
             boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMoveEnPassant);
             Board.ToggleColourToMove();
+        }
+        else if (MoveGenerator.moves.Contains(attemptedMoveQueenPromotion))
+        {
+            Board.pendingPromotion = true;
+            TryCapturePieceAt(newIndex);
+            bool isWhite = Board.square[startingIndex] == (Piece.Pawn | Piece.White);
+            boardUI.ShowPromotionUI(startingIndex, newIndex, isWhite);
+        }
+        else if (MoveGenerator.moves.Contains(attemptedMoveRookPromotion))
+        {
+            Board.pendingPromotion = true;
+            TryCapturePieceAt(newIndex);
+            bool isWhite = Board.square[startingIndex] == (Piece.Pawn | Piece.White);
+            boardUI.ShowPromotionUI(startingIndex, newIndex, isWhite);
+        }
+        else if (MoveGenerator.moves.Contains(attemptedMoveKnightPromotion))
+        {
+            Board.pendingPromotion = true;
+            TryCapturePieceAt(newIndex);
+            bool isWhite = Board.square[startingIndex] == (Piece.Pawn | Piece.White);
+            boardUI.ShowPromotionUI(startingIndex, newIndex, isWhite);
+        }
+        else if (MoveGenerator.moves.Contains(attemptedMoveBishopPromotion))
+        {
+            Board.pendingPromotion = true;
+            TryCapturePieceAt(newIndex);
+            bool isWhite = Board.square[startingIndex] == (Piece.Pawn | Piece.White);
+            boardUI.ShowPromotionUI(startingIndex, newIndex, isWhite);
         }
         else
         {
@@ -201,5 +232,19 @@ public class DragAndDropPiece : MonoBehaviour
         int x = Mathf.RoundToInt(position.x + 3.5f);
         int y = Mathf.RoundToInt(position.y + 3.5f);
         return y * 8 + x;
+    }
+
+    private bool IsPromotionMove(int startingIndex, int targetIndex)
+    {
+        int promotionRank = Piece.IsColour(Board.square[startingIndex] & 7, Piece.White) ? 7 : 0;
+
+        if (targetIndex / 8 == promotionRank)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }
