@@ -8,8 +8,8 @@ namespace Chess
     {
         public static List<Move> moves;
 
-        private static int friendlyColour;
-        private static int opponentColour;
+        public static int friendlyColour;
+        public static int opponentColour;
 
         public static List<Move> GenerateMoves()
         {
@@ -158,33 +158,32 @@ namespace Chess
                 int targetSquare = startSquare + offset;
                 if (IsSquareOnBoard(targetSquare) && System.Math.Abs((targetSquare % 8) - (startSquare % 8)) <= 1)
                 {
-                    if (Board.square[targetSquare] == Piece.None || Piece.IsColour(Board.square[targetSquare], opponentColour))
+                    if (!IsSquareAttacked(targetSquare, opponentColour))
                     {
                         moves.Add(new Move(startSquare, targetSquare));
                     }
                 }
             }
 
+            // Attempt to add castling moves if conditions are met
             if (Board.colourToMove == Piece.White)
             {
-                if (Board.CanCastleKingsideWhite && Board.square[5] == Piece.None && Board.square[6] == Piece.None)
+                if (Board.CanCastleKingsideWhite && IsCastlingPathClear(startSquare, true) && !IsSquareAttacked(startSquare, opponentColour))
                 {
                     moves.Add(new Move(startSquare, startSquare + 2, isCastling: true));
                 }
-
-                if (Board.CanCastleQueensideWhite && Board.square[1] == Piece.None && Board.square[2] == Piece.None && Board.square[3] == Piece.None)
+                if (Board.CanCastleQueensideWhite && IsCastlingPathClear(startSquare, false) && !IsSquareAttacked(startSquare, opponentColour))
                 {
                     moves.Add(new Move(startSquare, startSquare - 2, isCastling: true));
                 }
             }
             else if (Board.colourToMove == Piece.Black)
             {
-                if (Board.CanCastleKingsideBlack && Board.square[61] == Piece.None && Board.square[62] == Piece.None)
+                if (Board.CanCastleKingsideBlack && IsCastlingPathClear(startSquare, true) && !IsSquareAttacked(startSquare, opponentColour))
                 {
                     moves.Add(new Move(startSquare, startSquare + 2, isCastling: true));
                 }
-
-                if (Board.CanCastleQueensideBlack && Board.square[57] == Piece.None && Board.square[58] == Piece.None && Board.square[59] == Piece.None)
+                if (Board.CanCastleQueensideBlack && IsCastlingPathClear(startSquare, false) && !IsSquareAttacked(startSquare, opponentColour))
                 {
                     moves.Add(new Move(startSquare, startSquare - 2, isCastling: true));
                 }
@@ -212,6 +211,110 @@ namespace Chess
         private static bool IsSquareOnBoard(int square)
         {
             return square >= 0 && square < 64;
+        }
+
+        private static bool IsSquareAttacked(int square, int attackerColour)
+        {
+            // Pawns
+            int pawnDirection = attackerColour == Piece.White ? -1 : 1;
+            int[] pawnOffsets = { -1, 1 };
+            foreach (var offset in pawnOffsets)
+            {
+                int potentialPawnSquare = square + pawnDirection * 8 + offset;
+                if (IsSquareOnBoard(potentialPawnSquare) &&
+                    Board.square[potentialPawnSquare] == (Piece.Pawn | attackerColour))
+                {
+                    return true;
+                }
+            }
+
+            // Knights
+            foreach (var offset in knightOffsets)
+            {
+                int potentialKnightSquare = square + offset;
+                if (IsSquareOnBoard(potentialKnightSquare) &&
+                    Board.square[potentialKnightSquare] == (Piece.Knight | attackerColour))
+                {
+                    return true;
+                }
+            }
+
+            // Bishops and Queens (diagonal attacks)
+            foreach (var offset in bishopOffsets)
+            {
+                for (int n = 1; n < 8; n++)
+                {
+                    int potentialBishopSquare = square + n * offset;
+                    if (!IsSquareOnBoard(potentialBishopSquare)) break;
+
+                    if (Board.square[potentialBishopSquare] != Piece.None)
+                    {
+                        if (Board.square[potentialBishopSquare] == (Piece.Bishop | attackerColour) ||
+                            Board.square[potentialBishopSquare] == (Piece.Queen | attackerColour))
+                        {
+                            return true;
+                        }
+                        break; // Block by other pieces
+                    }
+                }
+            }
+
+            // Rooks and Queens (straight attacks)
+            foreach (var offset in rookOffsets)
+            {
+                for (int n = 1; n < 8; n++)
+                {
+                    int potentialRookSquare = square + n * offset;
+                    if (!IsSquareOnBoard(potentialRookSquare)) break;
+
+                    if (Board.square[potentialRookSquare] != Piece.None)
+                    {
+                        if (Board.square[potentialRookSquare] == (Piece.Rook | attackerColour) ||
+                            Board.square[potentialRookSquare] == (Piece.Queen | attackerColour))
+                        {
+                            return true;
+                        }
+                        break; // Block by other pieces
+                    }
+                }
+            }
+
+            // Kings
+            foreach (var offset in kingOffsets)
+            {
+                int potentialKingSquare = square + offset;
+                if (IsSquareOnBoard(potentialKingSquare) &&
+                    Board.square[potentialKingSquare] == (Piece.King | attackerColour))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+        private static bool IsCastlingPathClear(int kingStartSquare, bool isKingside)
+        {
+            int direction = isKingside ? 1 : -1;
+            for (int offset = 1; offset <= 2; offset++)
+            {
+                int squareToCheck = kingStartSquare + direction * offset;
+                if (Board.square[squareToCheck] != Piece.None || IsSquareAttacked(squareToCheck, opponentColour))
+                {
+                    return false;
+                }
+            }
+            // Additional check for queenside castling path (square d1 or d8 for white and black respectively)
+            if (!isKingside)
+            {
+                int queensideExtraSquare = kingStartSquare - 3;
+                if (Board.square[queensideExtraSquare] != Piece.None || IsSquareAttacked(queensideExtraSquare, opponentColour))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

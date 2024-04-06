@@ -56,7 +56,7 @@ public class DragAndDropPiece : MonoBehaviour
         selectedPiece.gameObject.GetComponent<SpriteRenderer>().sortingOrder += 1;
         offset = selectedPiece.position - mouseWorldPos;
         // Highlight legal moves
-        boardUI.HighlightLegalMoves(MoveGenerator.moves, startingIndex);
+        boardUI.HighlightLegalMoves(LegalMoveGenerator.legalMoves, startingIndex);
     }
 
     private void StopDragging()
@@ -73,52 +73,52 @@ public class DragAndDropPiece : MonoBehaviour
         Move attemptedMoveKnightPromotion = new Move(startingIndex, newIndex, isPromotion: true, promotionPiece: Piece.Knight);
         Move attemptedMoveBishopPromotion = new Move(startingIndex, newIndex, isPromotion: true, promotionPiece: Piece.Bishop);
         Move attemptedMoveCastle = new Move(startingIndex, newIndex, isCastling: true);
-        if (MoveGenerator.moves.Contains(attemptedMove))
+        if (LegalMoveGenerator.legalMoves.Contains(attemptedMove))
         {
             TryCapturePieceAt(newIndex);
             boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMove);
             Board.ToggleColourToMove();
         }
-        else if (MoveGenerator.moves.Contains(attemptedMoveDouble))
+        else if (LegalMoveGenerator.legalMoves.Contains(attemptedMoveDouble))
         {
             boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMoveDouble);
             Board.ToggleColourToMove();
         }
-        else if (MoveGenerator.moves.Contains(attemptedMoveEnPassant))
+        else if (LegalMoveGenerator.legalMoves.Contains(attemptedMoveEnPassant))
         {
             CapturePieceAtEnPassant(newIndex);
             boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMoveEnPassant);
             Board.ToggleColourToMove();
         }
-        else if (MoveGenerator.moves.Contains(attemptedMoveQueenPromotion))
+        else if (LegalMoveGenerator.legalMoves.Contains(attemptedMoveQueenPromotion))
         {
             Board.pendingPromotion = true;
             TryCapturePieceAt(newIndex);
             bool isWhite = Board.square[startingIndex] == (Piece.Pawn | Piece.White);
             boardUI.ShowPromotionUI(startingIndex, newIndex, isWhite);
         }
-        else if (MoveGenerator.moves.Contains(attemptedMoveRookPromotion))
+        else if (LegalMoveGenerator.legalMoves.Contains(attemptedMoveRookPromotion))
         {
             Board.pendingPromotion = true;
             TryCapturePieceAt(newIndex);
             bool isWhite = Board.square[startingIndex] == (Piece.Pawn | Piece.White);
             boardUI.ShowPromotionUI(startingIndex, newIndex, isWhite);
         }
-        else if (MoveGenerator.moves.Contains(attemptedMoveKnightPromotion))
+        else if (LegalMoveGenerator.legalMoves.Contains(attemptedMoveKnightPromotion))
         {
             Board.pendingPromotion = true;
             TryCapturePieceAt(newIndex);
             bool isWhite = Board.square[startingIndex] == (Piece.Pawn | Piece.White);
             boardUI.ShowPromotionUI(startingIndex, newIndex, isWhite);
         }
-        else if (MoveGenerator.moves.Contains(attemptedMoveBishopPromotion))
+        else if (LegalMoveGenerator.legalMoves.Contains(attemptedMoveBishopPromotion))
         {
             Board.pendingPromotion = true;
             TryCapturePieceAt(newIndex);
             bool isWhite = Board.square[startingIndex] == (Piece.Pawn | Piece.White);
             boardUI.ShowPromotionUI(startingIndex, newIndex, isWhite);
         }
-        else if (MoveGenerator.moves.Contains(attemptedMoveCastle))
+        else if (LegalMoveGenerator.legalMoves.Contains(attemptedMoveCastle))
         {
             boardUI.UpdateBoardState(startingIndex, newIndex, attemptedMoveCastle);
             Board.ToggleColourToMove();

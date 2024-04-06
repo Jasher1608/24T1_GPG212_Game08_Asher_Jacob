@@ -15,13 +15,13 @@ namespace Chess
 
         [SerializeField] private GameObject promotionUI;
 
-        private const string startingPosition = "r3k2r/8/4q3/8/2Q5/8/8/R3K2R";
+        private const string startingPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
         void Start()
         {
             Board.LoadPositionFromFen(startingPosition);
             CreateVisualBoard();
-            MoveGenerator.moves = MoveGenerator.GenerateMoves();
+            LegalMoveGenerator.legalMoves = LegalMoveGenerator.GenerateLegalMoves();
         }
 
         void CreateVisualBoard()

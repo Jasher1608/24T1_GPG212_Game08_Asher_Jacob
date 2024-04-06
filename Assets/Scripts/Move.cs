@@ -10,7 +10,6 @@ namespace Chess
         public bool IsEnPassant { get; }
         public bool IsPromotion { get; }
         public int PromotionPiece { get; }
-
         public bool IsCastling { get; }
 
         // Constructor for regular moves
