@@ -4,7 +4,10 @@ namespace Chess
 {
     public static class Board
     {
-        public static int[] Square = new int[64];
+        public static int[] square = new int[64];
+
+        public static int colourToMove = Piece.White;
+
         public static void LoadPositionFromFen(string fen)
         {
             var pieceTypeFromSymbol = new Dictionary<char, int>
@@ -35,10 +38,15 @@ namespace Chess
                 {
                     int pieceColor = (char.IsUpper(symbol)) ? Piece.White : Piece.Black;
                     int pieceType = pieceTypeFromSymbol[char.ToLower(symbol)];
-                    Square[rank * 8 + file] = pieceType | pieceColor;
+                    square[rank * 8 + file] = pieceType | pieceColor;
                     file++;
                 }
             }
+        }
+
+        public static void ToggleColourToMove()
+        {
+            colourToMove = (colourToMove == Piece.White) ? Piece.Black : Piece.White;
         }
     }
 }

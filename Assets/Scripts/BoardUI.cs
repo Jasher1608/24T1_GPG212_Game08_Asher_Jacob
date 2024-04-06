@@ -22,7 +22,7 @@ namespace Chess
         {
             for (int i = 0; i < 64; i++)
             {
-                int pieceCode = Board.Square[i];
+                int pieceCode = Board.square[i];
                 int pieceType = pieceCode & 7; // Get the first three bits to determine the piece type
                 int pieceColor = pieceCode & 24; // Get the fourth and fifth bits to determine the color
 

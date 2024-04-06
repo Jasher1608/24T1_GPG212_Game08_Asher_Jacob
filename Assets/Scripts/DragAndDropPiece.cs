@@ -29,12 +29,15 @@ public class DragAndDropPiece : MonoBehaviour
         {
             if (IsMouseOverPiece(mouseWorldPos))
             {
-                isDragging = true;
-                selectedPiece = transform;
-                startingPosition = selectedPiece.position;
+                startingPosition = transform.position;
                 startingIndex = PositionToIndex(startingPosition);
-                selectedPiece.gameObject.GetComponent<SpriteRenderer>().sortingOrder += 1;
-                offset = selectedPiece.position - mouseWorldPos;
+                if (IsCorrectColourToMove())
+                {
+                    isDragging = true;
+                    selectedPiece = transform;
+                    selectedPiece.gameObject.GetComponent<SpriteRenderer>().sortingOrder += 1;
+                    offset = selectedPiece.position - mouseWorldPos;
+                }
             }
         }
 
@@ -53,6 +56,10 @@ public class DragAndDropPiece : MonoBehaviour
             selectedPiece.position = newPosition;
             selectedPiece.gameObject.GetComponent<SpriteRenderer>().sortingOrder -= 1;
             selectedPiece = null;
+            if (newIndex != startingIndex)
+            {
+                Board.ToggleColourToMove();
+            }
         }
     }
 
@@ -63,11 +70,39 @@ public class DragAndDropPiece : MonoBehaviour
         return mainCamera.ScreenToWorldPoint(mousePoint);
     }
 
-    private bool IsMouseOverPiece(Vector3 position)
+    private bool IsMouseOverPiece(Vector3 mousePosition)
     {
-        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-        Bounds bounds = spriteRenderer.bounds;
-        return bounds.Contains(new Vector3(position.x, position.y, transform.position.z));
+        SpriteRenderer mySpriteRenderer = GetComponent<SpriteRenderer>();
+        Bounds myBounds = mySpriteRenderer.bounds;
+        if (!myBounds.Contains(new Vector3(mousePosition.x, mousePosition.y, transform.position.z)))
+        {
+            return false;
+        }
+
+        // Assuming there's a method to get all draggable pieces in the scene. This might be a method in BoardUI or another manager class.
+        var allPieces = FindObjectsOfType<DragAndDropPiece>();
+
+        float minDistance = float.MaxValue;
+        DragAndDropPiece closestPiece = null;
+
+        foreach (var piece in allPieces)
+        {
+            float distance = Vector3.Distance(mousePosition, piece.transform.position);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestPiece = piece;
+            }
+        }
+
+        // If this piece is not the closest to the mouse click, it's not the piece to drag.
+        return closestPiece == this;
+    }
+
+    private bool IsCorrectColourToMove()
+    {
+        int piece = Board.square[startingIndex];
+        return (piece & (Piece.White | Piece.Black)) == Board.colourToMove;
     }
 
     private Vector3 SnapToSquareCenter(Vector3 originalPosition)
@@ -96,7 +131,7 @@ public class DragAndDropPiece : MonoBehaviour
     private void TryCapturePieceAt(int newIndex)
     {
         // If capturing another piece, remove it from the UI and game state
-        if (Board.Square[newIndex] != Piece.None)
+        if ((Board.square[newIndex] != Piece.None) && newIndex != startingIndex)
         {
             int x = newIndex % 8;
             int y = newIndex / 8;
@@ -110,9 +145,12 @@ public class DragAndDropPiece : MonoBehaviour
 
     private void UpdateBoardState(int startingIndex, int targetIndex)
     {
-        int movedPiece = Board.Square[startingIndex];
-        Board.Square[targetIndex] = movedPiece;
-        Board.Square[startingIndex] = Piece.None;
+        int movedPiece = Board.square[startingIndex];
+        Board.square[targetIndex] = movedPiece;
+        if (startingIndex != targetIndex)
+        {
+            Board.square[startingIndex] = Piece.None;
+        }
 
         for (int i = 0; i < 64; i++)
         {
@@ -120,8 +158,8 @@ public class DragAndDropPiece : MonoBehaviour
             int y = i / 8;
 
             // If there's a discrepancy between the board state and the UI, update the UI
-            if ((Board.Square[i] != Piece.None && boardUI.pieceGameObjects[x, y] == null) ||
-                (Board.Square[i] == Piece.None && boardUI.pieceGameObjects[x, y] != null))
+            if ((Board.square[i] != Piece.None && boardUI.pieceGameObjects[x, y] == null) ||
+                (Board.square[i] == Piece.None && boardUI.pieceGameObjects[x, y] != null))
             {
                 if (boardUI.pieceGameObjects[x, y] != null)
                 {
@@ -129,10 +167,10 @@ public class DragAndDropPiece : MonoBehaviour
                     boardUI.pieceGameObjects[x, y] = null;
                 }
 
-                if (Board.Square[i] != Piece.None)
+                if (Board.square[i] != Piece.None)
                 {
                     Vector3 position = new Vector3(x - 3.5f, y - 3.5f, 0);
-                    boardUI.pieceGameObjects[x, y] = boardUI.InstantiatePieceAtPosition(Board.Square[i] & 7, Board.Square[i] & 24, position);
+                    boardUI.pieceGameObjects[x, y] = boardUI.InstantiatePieceAtPosition(Board.square[i] & 7, Board.square[i] & 24, position);
                 }
             }
         }
