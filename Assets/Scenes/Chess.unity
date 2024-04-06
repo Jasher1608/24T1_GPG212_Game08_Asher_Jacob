@@ -288,6 +288,7 @@ MonoBehaviour:
   - {fileID: -1222232556, guid: 42a1fb2351044ea48afda2b3e4bbcdac, type: 3}
   - {fileID: -1519559791, guid: 42a1fb2351044ea48afda2b3e4bbcdac, type: 3}
   - {fileID: -249559692, guid: 42a1fb2351044ea48afda2b3e4bbcdac, type: 3}
+  highlightPrefab: {fileID: 1842145259536276259, guid: 40491fb1a1d330740ae1a626055ad5ad, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

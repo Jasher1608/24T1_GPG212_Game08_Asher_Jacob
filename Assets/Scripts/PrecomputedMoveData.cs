@@ -4,7 +4,7 @@ namespace Chess
     {
         // First 4 are orthogonal, last 4 are diagonals (N, S, W, E, NW, SE, NE, SW)
         public static readonly int[] directionOffsets = { 8, -8, -1, 1, 7, -7, 9, -9 };
-        public static readonly int[][] numSquaresToEdge;
+        public static readonly int[][] numSquaresToEdge = new int[64][];
 
         static PrecomputedMoveData()
         {

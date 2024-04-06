@@ -13,9 +13,9 @@ namespace Chess
         public const int White = 8;
         public const int Black = 16;
 
-        public static bool IsColour(int piece, int color)
+        public static bool IsColour(int piece, int colour)
         {
-            return (piece & (White | Black)) == color;
+            return (piece & (White | Black)) == colour;
         }
 
         public static bool IsType(int piece, int type)

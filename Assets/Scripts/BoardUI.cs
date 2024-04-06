@@ -7,8 +7,10 @@ namespace Chess
     public class BoardUI : MonoBehaviour
     {
         [SerializeField] private List<Sprite> pieceSprites = new List<Sprite>();
+        [SerializeField] private GameObject highlightPrefab;
 
         public GameObject[,] pieceGameObjects = new GameObject[8, 8];
+        private List<GameObject> highlightedSquares = new List<GameObject>();
 
         private const string startingPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq";
 
@@ -16,6 +18,7 @@ namespace Chess
         {
             Board.LoadPositionFromFen(startingPosition);
             CreateVisualBoard();
+            MoveGenerator.moves = MoveGenerator.GenerateMoves();
         }
 
         void CreateVisualBoard()
@@ -54,6 +57,36 @@ namespace Chess
             pieceObject.AddComponent<DragAndDropPiece>();
 
             return pieceObject;
+        }
+
+        public void HighlightLegalMoves(List<Move> legalMoves, int startingIndex)
+        {
+            ClearHighlightedSquares();
+
+            foreach (Move move in legalMoves)
+            {
+                if (move.StartSquare == startingIndex)
+                {
+                    GameObject highlight = Instantiate(highlightPrefab, IndexToPosition(move.TargetSquare), Quaternion.identity, transform);
+                    highlightedSquares.Add(highlight);
+                }
+            }
+        }
+
+        public void ClearHighlightedSquares()
+        {
+            foreach (GameObject highlight in highlightedSquares)
+            {
+                Destroy(highlight);
+            }
+            highlightedSquares.Clear();
+        }
+
+        private Vector3 IndexToPosition(int index)
+        {
+            int x = index % 8;
+            int y = index / 8;
+            return new Vector3(x - 3.5f, y - 3.5f, 0);
         }
     }
 }

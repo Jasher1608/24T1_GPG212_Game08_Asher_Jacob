@@ -47,6 +47,7 @@ namespace Chess
         public static void ToggleColourToMove()
         {
             colourToMove = (colourToMove == Piece.White) ? Piece.Black : Piece.White;
+            MoveGenerator.moves = MoveGenerator.GenerateMoves();
         }
     }
 }

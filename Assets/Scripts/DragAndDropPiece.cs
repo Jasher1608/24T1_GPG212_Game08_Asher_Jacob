@@ -33,10 +33,7 @@ public class DragAndDropPiece : MonoBehaviour
                 startingIndex = PositionToIndex(startingPosition);
                 if (IsCorrectColourToMove())
                 {
-                    isDragging = true;
-                    selectedPiece = transform;
-                    selectedPiece.gameObject.GetComponent<SpriteRenderer>().sortingOrder += 1;
-                    offset = selectedPiece.position - mouseWorldPos;
+                    StartDragging(mouseWorldPos);
                 }
             }
         }
@@ -48,19 +45,42 @@ public class DragAndDropPiece : MonoBehaviour
 
         if (Input.GetMouseButtonUp(0) && isDragging)
         {
-            isDragging = false;
-            Vector3 newPosition = SnapToSquareCenter(selectedPiece.position);
-            int newIndex = PositionToIndex(newPosition);
+            StopDragging();
+        }
+    }
+
+    private void StartDragging(Vector3 mouseWorldPos)
+    {
+        isDragging = true;
+        selectedPiece = transform;
+        selectedPiece.gameObject.GetComponent<SpriteRenderer>().sortingOrder += 1;
+        offset = selectedPiece.position - mouseWorldPos;
+        // Highlight legal moves
+        boardUI.HighlightLegalMoves(MoveGenerator.moves, startingIndex);
+    }
+
+    private void StopDragging()
+    {
+        isDragging = false;
+        Vector3 newPosition = SnapToSquareCenter(selectedPiece.position);
+        int newIndex = PositionToIndex(newPosition);
+
+        Move attemptedMove = new Move(startingIndex, newIndex);
+        if (MoveGenerator.moves.Contains(attemptedMove))
+        {
             TryCapturePieceAt(newIndex);
             UpdateBoardState(startingIndex, newIndex);
-            selectedPiece.position = newPosition;
-            selectedPiece.gameObject.GetComponent<SpriteRenderer>().sortingOrder -= 1;
-            selectedPiece = null;
-            if (newIndex != startingIndex)
-            {
-                Board.ToggleColourToMove();
-            }
+            Board.ToggleColourToMove();
         }
+        else
+        {
+            selectedPiece.position = startingPosition;
+            Debug.Log("Illegal move");
+        }
+
+        selectedPiece.gameObject.GetComponent<SpriteRenderer>().sortingOrder -= 1;
+        selectedPiece = null;
+        boardUI.ClearHighlightedSquares();
     }
 
     private Vector3 GetMouseWorldPosition()
@@ -79,7 +99,6 @@ public class DragAndDropPiece : MonoBehaviour
             return false;
         }
 
-        // Assuming there's a method to get all draggable pieces in the scene. This might be a method in BoardUI or another manager class.
         var allPieces = FindObjectsOfType<DragAndDropPiece>();
 
         float minDistance = float.MaxValue;
@@ -95,7 +114,6 @@ public class DragAndDropPiece : MonoBehaviour
             }
         }
 
-        // If this piece is not the closest to the mouse click, it's not the piece to drag.
         return closestPiece == this;
     }
 
