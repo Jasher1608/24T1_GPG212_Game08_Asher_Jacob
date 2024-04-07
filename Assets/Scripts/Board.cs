@@ -1,5 +1,6 @@
 namespace Chess
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
 
@@ -27,6 +28,13 @@ namespace Chess
 
         public static void LoadPositionFromFen(string fen)
         {
+            // Reset the board state
+            Array.Fill(square, Piece.None);
+            colourToMove = Piece.White;
+            enPassantTarget = -1;
+            CanCastleKingsideWhite = CanCastleQueensideWhite = false;
+            CanCastleKingsideBlack = CanCastleQueensideBlack = false;
+
             var pieceTypeFromSymbol = new Dictionary<char, int>
             {
                 ['k'] = Piece.King,
@@ -37,7 +45,8 @@ namespace Chess
                 ['q'] = Piece.Queen
             };
 
-            string fenBoard = fen.Split(' ')[0];
+            string[] fenParts = fen.Split(' ');
+            string fenBoard = fenParts[0];
             int file = 0, rank = 7;
 
             foreach (char symbol in fenBoard)
@@ -58,6 +67,29 @@ namespace Chess
                     square[rank * 8 + file] = pieceType | pieceColor;
                     file++;
                 }
+            }
+
+            // Parse active color
+            colourToMove = (fenParts[1] == "w") ? Piece.White : Piece.Black;
+
+            // Parse castling availability
+            CanCastleKingsideWhite = fenParts[2].Contains('K');
+            CanCastleQueensideWhite = fenParts[2].Contains('Q');
+            CanCastleKingsideBlack = fenParts[2].Contains('k');
+            CanCastleQueensideBlack = fenParts[2].Contains('q');
+
+            if (fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+            {
+                CanCastleKingsideWhite = true;
+                CanCastleQueensideWhite = true;
+                CanCastleKingsideBlack = true;
+                CanCastleQueensideBlack = true;
+            }
+
+            // Parse en passant target square
+            if (fenParts[3] != "-")
+            {
+                enPassantTarget = (fenParts[3][1] - '1') * 8 + (fenParts[3][0] - 'a');
             }
         }
 
@@ -111,7 +143,16 @@ namespace Chess
             square[move.TargetSquare] = movedPiece;
             square[move.StartSquare] = Piece.None;
 
-            // Handle special moves
+            // Special handling for captures, specifically rook captures affecting castling rights
+            if (capturedPiece != Piece.None)
+            {
+                // Check if a rook at its original position is captured
+                if (move.TargetSquare == 0) CanCastleQueensideWhite = false;
+                else if (move.TargetSquare == 7) CanCastleKingsideWhite = false;
+                else if (move.TargetSquare == 56) CanCastleQueensideBlack = false;
+                else if (move.TargetSquare == 63) CanCastleKingsideBlack = false;
+            }
+
             // En passant capture
             if (move.IsEnPassant)
             {

@@ -19,11 +19,11 @@ namespace Chess
         {
             if (isAIWhite)
             {
-                aiColour = Piece.White;
+                aiColour = Piece.None;
             }
             else
             {
-                aiColour = Piece.Black;
+                aiColour = Piece.None;
             }
 
             isAIBoth = isAIBothInspector;

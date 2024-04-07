@@ -3,6 +3,7 @@ namespace Chess
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using static MoveGenerator;
 
@@ -34,7 +35,7 @@ namespace Chess
 
             if (legalMoves.Count == 0)
             {
-                throw new InvalidOperationException("No legal moves available for colour " + Board.colourToMove);
+                UnityEngine.Debug.Log("No legal moves available for colour " + Board.colourToMove);
             }
             return legalMoves;
         }

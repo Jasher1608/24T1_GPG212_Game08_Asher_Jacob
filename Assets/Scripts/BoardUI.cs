@@ -2,6 +2,7 @@ namespace Chess
 {
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using UnityEngine;
     using UnityEngine.UI;
 
@@ -15,13 +16,19 @@ namespace Chess
 
         [SerializeField] private GameObject promotionUI;
 
-        private const string startingPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+        private const string startingPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 
         void Start()
         {
             Board.LoadPositionFromFen(startingPosition);
             CreateVisualBoard();
             LegalMoveGenerator.legalMoves = LegalMoveGenerator.GenerateLegalMoves();
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            UnityEngine.Debug.Log(MoveGenerationTest.TestMoveGeneration(5));
+            stopwatch.Stop();
+            UnityEngine.Debug.Log("Took " + stopwatch.ElapsedMilliseconds + " ms");
         }
 
         void CreateVisualBoard()

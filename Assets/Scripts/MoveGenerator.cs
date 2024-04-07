@@ -165,25 +165,25 @@ namespace Chess
                 }
             }
 
-            // Attempt to add castling moves if conditions are met
-            if (Board.colourToMove == Piece.White)
+            // Castling conditions
+            if ((Board.colourToMove == Piece.White && startSquare == 4) || (Board.colourToMove == Piece.Black && startSquare == 60))
             {
-                if (Board.CanCastleKingsideWhite && IsCastlingPathClear(startSquare, true) && !IsSquareAttacked(startSquare, opponentColour))
+                // Kingside castling
+                if (Board.colourToMove == Piece.White && Board.CanCastleKingsideWhite && IsCastlingPathClear(4, true) && !IsSquareAttacked(4, opponentColour) && !IsSquareAttacked(5, opponentColour) && !IsSquareAttacked(6, opponentColour))
                 {
                     moves.Add(new Move(startSquare, startSquare + 2, isCastling: true));
                 }
-                if (Board.CanCastleQueensideWhite && IsCastlingPathClear(startSquare, false) && !IsSquareAttacked(startSquare, opponentColour))
+                else if (Board.colourToMove == Piece.Black && Board.CanCastleKingsideBlack && IsCastlingPathClear(60, true) && !IsSquareAttacked(60, opponentColour) && !IsSquareAttacked(61, opponentColour) && !IsSquareAttacked(62, opponentColour))
+                {
+                    moves.Add(new Move(startSquare, startSquare + 2, isCastling: true));
+                }
+
+                // Queenside castling
+                if (Board.colourToMove == Piece.White && Board.CanCastleQueensideWhite && IsCastlingPathClear(4, false) && !IsSquareAttacked(4, opponentColour) && !IsSquareAttacked(3, opponentColour) && !IsSquareAttacked(2, opponentColour))
                 {
                     moves.Add(new Move(startSquare, startSquare - 2, isCastling: true));
                 }
-            }
-            else if (Board.colourToMove == Piece.Black)
-            {
-                if (Board.CanCastleKingsideBlack && IsCastlingPathClear(startSquare, true) && !IsSquareAttacked(startSquare, opponentColour))
-                {
-                    moves.Add(new Move(startSquare, startSquare + 2, isCastling: true));
-                }
-                if (Board.CanCastleQueensideBlack && IsCastlingPathClear(startSquare, false) && !IsSquareAttacked(startSquare, opponentColour))
+                else if (Board.colourToMove == Piece.Black && Board.CanCastleQueensideBlack && IsCastlingPathClear(60, false) && !IsSquareAttacked(60, opponentColour) && !IsSquareAttacked(59, opponentColour) && !IsSquareAttacked(58, opponentColour))
                 {
                     moves.Add(new Move(startSquare, startSquare - 2, isCastling: true));
                 }
