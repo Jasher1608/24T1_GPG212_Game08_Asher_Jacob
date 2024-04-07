@@ -13,38 +13,31 @@ namespace Chess
 
         public static List<Move> GenerateLegalMoves()
         {
-            List<Move> pseudoLegalMoves = MoveGenerator.GenerateMoves();
-            List<Move> legalMoves = new List<Move>();
+            List<Move> pseudoLegalMoves = GenerateMoves();
+            legalMoves = new List<Move>();
 
-            foreach (Move move in pseudoLegalMoves)
+            foreach (Move moveToVerify in pseudoLegalMoves)
             {
-                // Apply the move to see if it results in a check
-                Board.MakeMove(move, false, false); // Assume MakeMove temporarily applies a move
+                Board.MakeMove(moveToVerify);
+                List<Move> opponentResponses = GenerateMoves();
 
-                // Find the king's square after the move
-                int kingSquare = FindKingSquare(Board.colourToMove);
-
-                if (!IsSquareAttacked(kingSquare, opponentColour))
+                if (opponentResponses.Any(response => Board.square[response.TargetSquare] == (Piece.King | opponentColour)))
                 {
-                    legalMoves.Add(move);
+
+                }
+                else
+                {
+                    legalMoves.Add(moveToVerify);
                 }
 
-                Board.UnmakeMove(false); // Revert the move
+                Board.UnmakeMove();
+            }
+
+            if (legalMoves.Count == 0)
+            {
+                UnityEngine.Debug.Log("No legal moves available for colour " + Board.colourToMove);
             }
             return legalMoves;
         }
-
-        private static int FindKingSquare(int colour)
-        {
-            for (int i = 0; i < 64; i++)
-            {
-                if (Board.square[i] == (colour | Piece.King))
-                {
-                    return i;
-                }
-            }
-            throw new Exception("King not found. Invalid board state.");
-        }
-
     }
 }
