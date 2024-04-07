@@ -183,7 +183,7 @@ namespace Chess
             }
         }
 
-        public static void UnmakeMove()
+        public static void UnmakeMove(bool toggleColour = true)
         {
             if (moveHistory.Count == 0) return;
 
@@ -218,7 +218,10 @@ namespace Chess
             CanCastleKingsideBlack = oldCanCastleKingsideBlack;
             CanCastleQueensideBlack = oldCanCastleQueensideBlack;
 
-            ToggleColourToMove(generateMoves: false); // Change the active player back
+            if (toggleColour)
+            {
+                ToggleColourToMove(generateMoves: false); // Change the active player back
+            }
         }
     }
 

@@ -212,7 +212,7 @@ namespace Chess
             return square >= 0 && square < 64;
         }
 
-        private static bool IsSquareAttacked(int square, int attackerColour)
+        public static bool IsSquareAttacked(int square, int attackerColour)
         {
             // Pawns
             int pawnDirection = attackerColour == Piece.White ? -1 : 1;
