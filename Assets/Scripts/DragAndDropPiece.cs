@@ -25,7 +25,7 @@ public class DragAndDropPiece : MonoBehaviour
     {
         Vector3 mouseWorldPos = GetMouseWorldPosition();
 
-        if (Input.GetMouseButtonDown(0) && !Board.pendingPromotion)
+        if (Input.GetMouseButtonDown(0) && !Board.pendingPromotion && (Board.colourToMove != AIController.aiColour) && !AIController.isAIBoth)
         {
             if (IsMouseOverPiece(mouseWorldPos))
             {

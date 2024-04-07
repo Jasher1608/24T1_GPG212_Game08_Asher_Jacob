@@ -96,7 +96,7 @@ namespace Chess
                 // Check if the move stays within the bounds of the board
                 if (targetSquare >= 0 && targetSquare < 64)
                 {
-                    // Ensure the move does not "wrap" around the board
+                    // Ensure the move does not wrap around the board
                     if (System.Math.Abs(targetSquareFile - startSquareFile) <= 2 && System.Math.Abs(targetSquareRank - startSquareRank) <= 2)
                     {
                         // Check if the target square is not occupied by a friendly piece
@@ -158,7 +158,7 @@ namespace Chess
                 int targetSquare = startSquare + offset;
                 if (IsSquareOnBoard(targetSquare) && System.Math.Abs((targetSquare % 8) - (startSquare % 8)) <= 1)
                 {
-                    if (!IsSquareAttacked(targetSquare, opponentColour))
+                    if (Piece.IsColour(Board.square[targetSquare], opponentColour) || Board.square[targetSquare] == Piece.None)
                     {
                         moves.Add(new Move(startSquare, targetSquare));
                     }
@@ -196,7 +196,6 @@ namespace Chess
             int promotionRank = Piece.IsColour(pawn, Piece.White) ? 7 : 0;
             if (targetSquare / 8 == promotionRank)
             {
-                // Add all promotion options here if needed
                 moves.Add(new Move(startSquare, targetSquare, isPromotion: true, promotionPiece: Piece.Queen));
                 moves.Add(new Move(startSquare, targetSquare, isPromotion: true, promotionPiece: Piece.Rook));
                 moves.Add(new Move(startSquare, targetSquare, isPromotion: true, promotionPiece: Piece.Knight));
@@ -292,7 +291,6 @@ namespace Chess
 
             return false;
         }
-
 
         private static bool IsCastlingPathClear(int kingStartSquare, bool isKingside)
         {

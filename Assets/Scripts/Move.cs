@@ -1,7 +1,8 @@
-using Unity.VisualScripting;
-
 namespace Chess
 {
+    using System;
+    using System.Collections.Generic;
+
     public readonly struct Move
     {
         public int StartSquare { get; }
@@ -34,6 +35,18 @@ namespace Chess
             IsPromotion = isPromotion;
             PromotionPiece = promotionPiece;
             IsCastling = isCastling;
+        }
+
+        public static Move ChooseComputerMove()
+        {
+            if (LegalMoveGenerator.legalMoves.Count == 0)
+            {
+                throw new InvalidOperationException("No legal moves available for colour " + Board.colourToMove);
+            }
+
+            Random random = new Random();
+            int index = random.Next(0, LegalMoveGenerator.legalMoves.Count);
+            return LegalMoveGenerator.legalMoves[index];
         }
 
         // Implementing equality methods

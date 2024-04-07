@@ -1,5 +1,6 @@
 namespace Chess
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
@@ -31,6 +32,10 @@ namespace Chess
                 Board.UnmakeMove();
             }
 
+            if (legalMoves.Count == 0)
+            {
+                throw new InvalidOperationException("No legal moves available for colour " + Board.colourToMove);
+            }
             return legalMoves;
         }
     }

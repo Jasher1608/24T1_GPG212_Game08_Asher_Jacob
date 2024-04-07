@@ -191,7 +191,6 @@ namespace Chess
             {
                 int x = i % 8;
                 int y = i / 8;
-
                 // If there's a discrepancy between the board state and the UI, update the UI
                 if ((Board.square[i] != Piece.None && pieceGameObjects[x, y] == null) ||
                     (Board.square[i] == Piece.None && pieceGameObjects[x, y] != null))

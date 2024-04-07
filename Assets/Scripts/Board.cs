@@ -68,6 +68,7 @@ namespace Chess
             {
                 LegalMoveGenerator.legalMoves = LegalMoveGenerator.GenerateLegalMoves();
             }
+            AIController.isCalculatingMove = false;
         }
 
         public static void ApplyMove(int startingIndex, int piece)
@@ -101,7 +102,7 @@ namespace Chess
             }
         }
 
-        public static void MakeMove(Move move)
+        public static void MakeMove(Move move, bool generateMoves = false, bool toggleColour = true)
         {
             int capturedPiece = square[move.TargetSquare];
             int movedPiece = square[move.StartSquare];
@@ -135,7 +136,10 @@ namespace Chess
             // Update castling rights
             ApplyMove(move.StartSquare, movedPiece);
 
-            ToggleColourToMove(generateMoves: false); // Change the active player
+            if (toggleColour)
+            {
+                ToggleColourToMove(generateMoves: generateMoves); // Change the active player
+            }
         }
 
         public static void UnmakeMove()
