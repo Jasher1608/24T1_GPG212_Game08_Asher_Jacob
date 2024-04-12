@@ -2,6 +2,7 @@ namespace Chess
 {
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using UnityEngine;
 
     public class AIController : MonoBehaviour
@@ -19,11 +20,11 @@ namespace Chess
         {
             if (isAIWhite)
             {
-                aiColour = Piece.None;
+                aiColour = Piece.White;
             }
             else
             {
-                aiColour = Piece.None;
+                aiColour = Piece.Black;
             }
 
             isAIBoth = isAIBothInspector;
@@ -36,9 +37,11 @@ namespace Chess
             if (((aiColour == Board.colourToMove) || isAIBoth) && !isCalculatingMove)
             {
                 isCalculatingMove = true;
+                Stopwatch stopwatch = Stopwatch.StartNew();
                 aiMove = Move.ChooseComputerMove();
-                Debug.Log(aiMove.StartSquare);
-                Debug.Log(aiMove.TargetSquare);
+                stopwatch.Stop();
+                UnityEngine.Debug.Log("Took " + stopwatch.ElapsedMilliseconds + " ms");
+                UnityEngine.Debug.Log(aiMove.StartSquare + ", " + aiMove.TargetSquare);
 
                 if ((Board.square[aiMove.TargetSquare] != Piece.None) && aiMove.TargetSquare != aiMove.StartSquare)
                 {

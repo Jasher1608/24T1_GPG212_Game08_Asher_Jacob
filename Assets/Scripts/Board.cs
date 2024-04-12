@@ -11,8 +11,10 @@ namespace Chess
         public static int colourToMove = Piece.White;
 
         public static int enPassantTarget = -1;
+        private static int oldEnPassantTarget = -1;
 
         public static bool pendingPromotion = false;
+        private static bool oldPendingPromotion = false;
 
         public static bool CanCastleKingsideWhite = true;
         public static bool CanCastleQueensideWhite = true;
@@ -23,8 +25,29 @@ namespace Chess
         private static bool oldCanCastleKingsideBlack = true;
         private static bool oldCanCastleQueensideBlack = true;
 
-        public static Stack<MoveHistoryItem> moveHistory = new Stack<MoveHistoryItem>();
+        public static int whitePawnCount;
+        public static int whiteBishopCount;
+        public static int whiteKnightCount;
+        public static int whiteRookCount;
+        public static int whiteQueenCount;
+        public static int oldWhitePawnCount;
+        public static int oldWhiteBishopCount;
+        public static int oldWhiteKnightCount;
+        public static int oldWhiteRookCount;
+        public static int oldWhiteQueenCount;
 
+        public static int blackPawnCount;
+        public static int blackBishopCount;
+        public static int blackKnightCount;
+        public static int blackRookCount;
+        public static int blackQueenCount;
+        public static int oldBlackPawnCount;
+        public static int oldBlackBishopCount;
+        public static int oldBlackKnightCount;
+        public static int oldBlackRookCount;
+        public static int oldBlackQueenCount;
+
+        public static Stack<MoveHistoryItem> moveHistory = new Stack<MoveHistoryItem>();
 
         public static void LoadPositionFromFen(string fen)
         {
@@ -136,6 +159,21 @@ namespace Chess
 
         public static void MakeMove(Move move, bool generateMoves = false, bool toggleColour = true)
         {
+            oldEnPassantTarget = enPassantTarget;
+            oldPendingPromotion = pendingPromotion;
+
+            oldWhitePawnCount = whitePawnCount;
+            oldWhiteBishopCount = whiteBishopCount;
+            oldWhiteKnightCount = whiteKnightCount;
+            oldWhiteRookCount = whiteRookCount;
+            oldWhiteQueenCount = whiteQueenCount;
+
+            oldBlackPawnCount = blackPawnCount;
+            oldBlackBishopCount = blackBishopCount;
+            oldBlackKnightCount = blackKnightCount;
+            oldBlackRookCount = blackRookCount;
+            oldBlackQueenCount = blackQueenCount;
+
             int capturedPiece = square[move.TargetSquare];
             int movedPiece = square[move.StartSquare];
 
@@ -151,6 +189,63 @@ namespace Chess
                 else if (move.TargetSquare == 7) CanCastleKingsideWhite = false;
                 else if (move.TargetSquare == 56) CanCastleQueensideBlack = false;
                 else if (move.TargetSquare == 63) CanCastleKingsideBlack = false;
+
+                // Update piece count
+                if (Piece.IsType(capturedPiece, Piece.Pawn))
+                {
+                    if (Piece.IsColour(capturedPiece, Piece.White))
+                    {
+                        whitePawnCount--;
+                    }
+                    else
+                    {
+                        blackPawnCount--;
+                    }
+                }
+                else if (Piece.IsType(capturedPiece, Piece.Bishop))
+                {
+                    if (Piece.IsColour(capturedPiece, Piece.White))
+                    {
+                        whiteBishopCount--;
+                    }
+                    else
+                    {
+                        blackBishopCount--;
+                    }
+                }
+                else if (Piece.IsType(capturedPiece, Piece.Knight))
+                {
+                    if (Piece.IsColour(capturedPiece, Piece.White))
+                    {
+                        whiteKnightCount--;
+                    }
+                    else
+                    {
+                        blackKnightCount--;
+                    }
+                }
+                else if (Piece.IsType(capturedPiece, Piece.Rook))
+                {
+                    if (Piece.IsColour(capturedPiece, Piece.White))
+                    {
+                        whiteRookCount--;
+                    }
+                    else
+                    {
+                        blackRookCount--;
+                    }
+                }
+                else if (Piece.IsType(capturedPiece, Piece.Queen))
+                {
+                    if (Piece.IsColour(capturedPiece, Piece.White))
+                    {
+                        whiteQueenCount--;
+                    }
+                    else
+                    {
+                        blackQueenCount--;
+                    }
+                }
             }
 
             // En passant capture
@@ -177,13 +272,14 @@ namespace Chess
             // Update castling rights
             ApplyMove(move.StartSquare, movedPiece);
 
+
             if (toggleColour)
             {
                 ToggleColourToMove(generateMoves: generateMoves); // Change the active player
             }
         }
 
-        public static void UnmakeMove()
+        public static void UnmakeMove(bool toggleColour = true)
         {
             if (moveHistory.Count == 0) return;
 
@@ -195,31 +291,104 @@ namespace Chess
             square[lastMove.StartSquare] = square[lastMove.TargetSquare];
             square[lastMove.TargetSquare] = capturedPiece; // Restore the captured piece, if any
 
-            // Handle reversing special moves
-            if (lastMove.IsEnPassant)
-            {
-                int pawnCaptureSquare = (lastMove.TargetSquare & 0x07) + (lastMove.StartSquare & ~0x07);
-                square[pawnCaptureSquare] = capturedPiece; // Restore the pawn captured en passant
-                square[lastMove.TargetSquare] = Piece.None; // Clear the target square
-            }
-            else if (lastMove.IsCastling)
-            {
-                bool isKingside = lastMove.TargetSquare > lastMove.StartSquare;
-                int rookStartSquare = isKingside ? lastMove.TargetSquare + 1 : lastMove.TargetSquare - 2;
-                int rookTargetSquare = isKingside ? lastMove.TargetSquare - 1 : lastMove.TargetSquare + 1;
-
-                square[rookStartSquare] = square[rookTargetSquare]; // Move the rook back
-                square[rookTargetSquare] = Piece.None;
-            }
-
             // Restore castling rights if they were changed by this move
             CanCastleKingsideWhite = oldCanCastleKingsideWhite;
             CanCastleQueensideWhite = oldCanCastleQueensideWhite;
             CanCastleKingsideBlack = oldCanCastleKingsideBlack;
             CanCastleQueensideBlack = oldCanCastleQueensideBlack;
 
-            ToggleColourToMove(generateMoves: false); // Change the active player back
+            enPassantTarget = oldEnPassantTarget;
+            pendingPromotion = oldPendingPromotion;
+
+            whitePawnCount = oldWhitePawnCount;
+            whiteBishopCount = oldWhiteBishopCount;
+            whiteKnightCount = oldWhiteKnightCount;
+            whiteRookCount = oldWhiteRookCount;
+            whiteQueenCount = oldWhiteQueenCount;
+
+            blackPawnCount = oldBlackPawnCount;
+            blackBishopCount = oldBlackBishopCount;
+            blackKnightCount = oldBlackKnightCount;
+            blackRookCount = oldBlackRookCount;
+            blackQueenCount = oldBlackQueenCount;
+
+            if (toggleColour)
+            {
+                ToggleColourToMove(generateMoves: false); // Change the active player back
+            }
+        }
+
+        public static void CountPieces()
+        {
+            whitePawnCount = 0;
+            whiteBishopCount = 0;
+            whiteKnightCount = 0;
+            whiteRookCount = 0;
+            whiteQueenCount = 0;
+            blackPawnCount = 0;
+            blackBishopCount = 0;
+            blackKnightCount = 0;
+            blackRookCount = 0;
+            blackQueenCount = 0;
+
+            foreach (int i in square)
+            {
+                if (Piece.IsType(i, Piece.Pawn))
+                {
+                    if (Piece.IsColour(i, Piece.White))
+                    {
+                        whitePawnCount++;
+                    }
+                    else
+                    {
+                        blackPawnCount++;
+                    }
+                }
+                else if (Piece.IsType(i, Piece.Bishop))
+                {
+                    if (Piece.IsColour(i, Piece.White))
+                    {
+                        whiteBishopCount++;
+                    }
+                    else
+                    {
+                        blackBishopCount++;
+                    }
+                }
+                else if (Piece.IsType(i, Piece.Knight))
+                {
+                    if (Piece.IsColour(i, Piece.White))
+                    {
+                        whiteKnightCount++;
+                    }
+                    else
+                    {
+                        blackKnightCount++;
+                    }
+                }
+                else if (Piece.IsType(i, Piece.Rook))
+                {
+                    if (Piece.IsColour(i, Piece.White))
+                    {
+                        whiteRookCount++;
+                    }
+                    else
+                    {
+                        blackRookCount++;
+                    }
+                }
+                else if (Piece.IsType(i, Piece.Queen))
+                {
+                    if (Piece.IsColour(i, Piece.White))
+                    {
+                        whiteQueenCount++;
+                    }
+                    else
+                    {
+                        blackQueenCount++;
+                    }
+                }
+            }
         }
     }
-
 }

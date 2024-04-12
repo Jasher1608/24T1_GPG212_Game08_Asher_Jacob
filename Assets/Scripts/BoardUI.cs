@@ -23,12 +23,14 @@ namespace Chess
         {
             Board.LoadPositionFromFen(startingPosition);
             CreateVisualBoard();
-            LegalMoveGenerator.legalMoves = LegalMoveGenerator.GenerateLegalMoves();
-
+            Board.CountPieces();
+            /*
             Stopwatch stopwatch = Stopwatch.StartNew();
             UnityEngine.Debug.Log(MoveGenerationTest.TestMoveGeneration(5));
             stopwatch.Stop();
             UnityEngine.Debug.Log("Took " + stopwatch.ElapsedMilliseconds + " ms");
+            */
+            LegalMoveGenerator.legalMoves = LegalMoveGenerator.GenerateLegalMoves();
         }
 
         void CreateVisualBoard()
@@ -231,6 +233,8 @@ namespace Chess
             {
                 Board.enPassantTarget = -1;
             }
+
+            Board.CountPieces();
 
             Board.ApplyMove(startingIndex, movedPiece); // Disables castling flags
         }
