@@ -155,7 +155,7 @@ namespace Chess
                         int rookStartIndex = startingIndex + 3;
                         int rookTargetIndex = targetIndex - 1;
 
-                        Board.square[rookTargetIndex] = Board.square[rookStartIndex];
+                        //Board.square[rookTargetIndex] = Board.square[rookStartIndex];
                         Board.square[rookStartIndex] = Piece.None;
                         UpdatePieceGameObject(rookStartIndex, rookTargetIndex);
 
@@ -177,7 +177,7 @@ namespace Chess
                         int rookStartIndex = startingIndex - 4;
                         int rookTargetIndex = targetIndex + 1;
 
-                        Board.square[rookTargetIndex] = Board.square[rookStartIndex];
+                        //Board.square[rookTargetIndex] = Board.square[rookStartIndex];
                         Board.square[rookStartIndex] = Piece.None;
                         UpdatePieceGameObject(rookStartIndex, rookTargetIndex);
 
